@@ -1,4 +1,4 @@
-def GetMatrix(r, ColCount):
+def GetMatrix(r, colCount):
     """
     функция,которая делит вектор-сигнала
     на колл-во-colCount длинну фильтра(3),
@@ -10,7 +10,7 @@ def GetMatrix(r, ColCount):
     rowIndex = 0
     for ii in range(m):
         matrix[rowIndex].append(array[ii])
-        if ii % ColCount == 0 and ii != 0:
+        if (ii + 1) % colCount == 0 and (ii + 1) != m:
             rowIndex += 1
             matrix.append([])
     return matrix

@@ -14,22 +14,25 @@ import PyQt5.QtCore as QtCore             # Ядро функционально�
 import math                               # Бибилотека математических функций
 import random                             # Для генерации случайных чисел
 import numpy as np                        # Библиотека математики
+from numpy import eye                     # Возвращает диагонали 1
 from numpy import convolve as conv        # Функция для свертки одномерных массивов
 from numpy import real                    # Функция для возвращения действительной часть аргумента сложного типа данных
 from numpy import random as rd            # Функция для случайных значений
 from numpy import dot                     # Функция для перемножения матриц
-from numpy import eye                     # Возвращает диагонали 1
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from scipy.signal import convolve
 
-from input_window import Ui_OtherWindow   # Импортируем класс второго окна (Окна для ввода отношений Сигнал/Шум)
 from actions.GetMatrix import GetMatrix   # Функция, которая делит вектор-сигнала на колл-во-colCount длинну фильтра. Из вектора получается матрица
 from actions.GetVector import GetVector   # Функция для объединения векторов
 #-------------------------------------------------------------------------------
 
 
+
 class Ui_MainWindow(object):
+
+    def indices(self, a, func):
+        return [i for (i, val) in enumerate(a) if func(val)]
 
     def create_graphics(self, simBer, color):
 
@@ -40,7 +43,7 @@ class Ui_MainWindow(object):
         ax.set_xlim(0, xmax= self.osh[-1])
         fig.tight_layout()
         plt.plot(self.osh, simBer, color = "{}".format(color), lw = 2, ls= "--", marker= "*")
-        #ax.set_ylim(0, ymax = 1)
+        ax.set_ylim(0.3, ymax = 1)
         plt.yscale("log")
         plt.grid(True)
         canvas = FigureCanvas(fig)
@@ -75,10 +78,6 @@ class Ui_MainWindow(object):
                     hM[i][k].append(ht[j][k][i])
 
         # --- end of канальная матриц
-        # --- длина интервала обработки принимаемых сигналов
-        dl = (zz / self.input) + self.len - 1
-
-        # --- end of длина интервала обработки принимаемых сигналов
         # --- пустые вектора принятого сигнала для 2-х алгоритмов
         nErrZF = [0 for i in range(len(self.osh))]
         nErrmmse = [0 for i in range(len(self.osh))]
@@ -90,15 +89,16 @@ class Ui_MainWindow(object):
                 else: ip.append(0)
             s = []
             for i in ip:
-                s.append(2 * ip[i] - 1)
+                s.append(2 * i - 1)
             ss = GetMatrix(s, zz)
 
         # -- end of пустые вектора принятого сигнала для 2-х алгоритмов
         # --- MIMO - канал связи
-            ssipZF = [[0] for i in range(nz)]
-            ssipmmse = [[0] for i in range(nz)]
+            ssipZF = [[0] * zz for i in range(nz)]
+            ssipmmse = [[0] * zz for i in range(nz)]
             for ff in range(nz):
                 st = ss[ff][:]
+
         # --- end of MIMO - канал связи
         # --- делитель потока сигнала делится по колличеству nTx
                 ind = []
@@ -123,7 +123,8 @@ class Ui_MainWindow(object):
         # --- генерация отсчетов Гауссовского шума
                 n = []
                 for i in range(self.send):
-                    num = 1 / math.sqrt(2) * (rd.randn(1, int(zz / 2 + self.len - 1)) + 1j * rd.randn(1, int(zz / 2 + self.len - 1)))
+                    no = int(zz / 2 + self.len - 1)
+                    num = 1 / math.sqrt(2) * (rd.randn(1, no) + 1j * rd.randn(1, no))
                     n.append(num)
 
         # --- end of генерация отсчетов Гауссовского шума
@@ -134,17 +135,17 @@ class Ui_MainWindow(object):
 
         # --- end of сигнал на входе эквалайзера, прошедший весь канал связи с БГШ
         # --- фильтрация
-                dl = int(len(y[0][0]))
-                num = 0
+                dl = len(y[0][0])
                 HM = [[0] * zz for i in range(dl*2)]
+
                 for k in range(0, zz - 2, 2):
+                    num = 0
                     for i in range(self.len):
                         HM[num + k][k] = hM[i][0][0]
                         HM[num + k][k + 1] = hM[i][0][1]
                         HM[num + 1 + k][k] = hM[i][1][0]
                         HM[num + 1 + k][k + 1] = hM[i][1][1]
                         num += 2
-                    num = 0
                 yHat = np.array(GetVector(y[0][0], y[1][0]))  # объединитель потока
 
         # --- end of фильтрация
@@ -152,25 +153,26 @@ class Ui_MainWindow(object):
                 if self.alg == "ZF":
                     HMzf = np.array(HM)
                     WZF = np.linalg.pinv(HMzf)
-                    ySampZF = dot(WZF, yHat.transpose())  # результат работы ZF алгоритма, сигнал после "очистки " эквалайзером
+                    ySampZF = dot(WZF, yHat.transpose())
                     ipHatZFst = real(ySampZF.transpose()) > 0
                     ssipZF[ff][:] = ipHatZFst
 
                 elif self.alg == "MMSE":
                     HMmmse = np.array(HM)
-                    a = dot(HMmmse.transpose(), HMmmse)
-                    b = dot(10 ** (-self.osh[ii] / 10), np.identity(zz))
-                    Wmmse = dot(np.linalg.inv(a + b), HMmmse.transpose())
-                    ySampmmse = dot(Wmmse, yHat.transpose())  # результат работы MMSE алгоритма, сигнал после "очистки " эквалайзером
+                    Wmmse = dot(np.linalg.inv(dot(HMmmse.transpose(), HMmmse) + (10 ** (-self.osh[ii] / 10) * eye(zz))), HMmmse.transpose())
+                    ySampmmse = dot(Wmmse, yHat.transpose())
                     ipHatmmsest = real(ySampmmse.transpose()) > 0
                     ssipmmse[ff][:] = ipHatmmsest
 
+
             if self.alg == "ZF":
-                ipHatZF = np.reshape(np.array(ssipZF).transpose(), (1, self.num))
-                nErrZF[ii] = np.size(np.where(ip - ipHatZF), 1)
-            else:
-                ipHatmmse = np.reshape(np.array(ssipmmse).transpose(), (1, self.num))
-                nErrmmse[ii] = np.size(np.where(ip - ipHatmmse), 1)
+                ipHatZF = np.reshape(np.array(ssipZF).transpose(), self.num)
+                inds = self.indices(ip - ipHatZF, lambda x: x != 0)
+                nErrZF[ii] = np.size(inds)
+            elif self.alg == "MMSE":
+                ipHatmmse = np.reshape(np.array(ssipmmse).transpose(), self.num)
+                inds = self.indices(ip - ipHatmmse, lambda x: x != 0)
+                nErrmmse[ii] = np.size(inds)
 
         if self.alg == "ZF":
             simBerZF = [i / self.num for i in nErrZF]
@@ -188,9 +190,9 @@ class Ui_MainWindow(object):
             self.lineEdit.setText("0")
             self.num = 0
 
-        num =  int(self.comboBox_2.currentText())
+        n = int(self.comboBox_2.currentText())
         self.osh = []
-        for i in range(num + 1):
+        for i in range(n + 1):
             self.osh.append(i)
 
         if len(self.lineEdit_3.text()) > 0:
