@@ -7,7 +7,7 @@ def GetVector(vector1, vector2):
     vecIndex1 = 0
     vecIndex2 = 0
     for kk in range(nn):
-        if kk % 2 != 0:
+        if (kk + 1) % 2 != 0:
             s[kk] = vector1[vecIndex1]
             vecIndex1 += 1
         else:

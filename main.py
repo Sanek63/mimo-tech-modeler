@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-import sys                             # Функция обеспечивает доступ к некоторым переменным и функциям, взаимодействующим с интерпретатором python.
+import sys                             # Библиотека обеспечивает доступ к некоторым системным функциям
 from interface import *                # Импорт всех аргументов из файла interface.py
 import PyQt5.QtWidgets as QtWidgets    # Компоненты для приложения
 import PyQt5.QtGui as QtGui            # Графический интерфейс пользователя
@@ -14,7 +14,7 @@ class MyWin(QtWidgets.QMainWindow):
 
 def settings(ui):
     """Поле ввода для Числа отчетов : lineEdit"""
-    ui.lineEdit.setValidator(QtGui.QIntValidator(0, 10**6))
+    ui.lineEdit.setValidator(QtGui.QIntValidator(0, 10 ** 6))
 
     """Поле ввода для ОСШ (Сигнал/Шум) : lineEdit_2"""
 

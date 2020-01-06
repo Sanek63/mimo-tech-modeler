@@ -19,9 +19,8 @@ from numpy import convolve as conv        # Функция для свертки
 from numpy import real                    # Функция для возвращения действительной часть аргумента сложного типа данных
 from numpy import random as rd            # Функция для случайных значений
 from numpy import dot                     # Функция для перемножения матриц
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt           # Функция для работы с двумерными фигурами
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from scipy.signal import convolve
 
 from actions.GetMatrix import GetMatrix   # Функция, которая делит вектор-сигнала на колл-во-colCount длинну фильтра. Из вектора получается матрица
 from actions.GetVector import GetVector   # Функция для объединения векторов
@@ -31,9 +30,12 @@ from actions.GetVector import GetVector   # Функция для объедин
 
 class Ui_MainWindow(object):
 
+    # --- функция для нахождения восхождений вектора, не равных нулю
     def indices(self, a, func):
         return [i for (i, val) in enumerate(a) if func(val)]
 
+    # --- end of функция для нахождения нахождений вектора, не равых нулю
+    # --- функция для построения графика
     def create_graphics(self, simBer, color):
 
         fig, ax = plt.subplots(figsize=(5, 3), dpi= 150)
@@ -43,13 +45,14 @@ class Ui_MainWindow(object):
         ax.set_xlim(0, xmax= self.osh[-1])
         fig.tight_layout()
         plt.plot(self.osh, simBer, color = "{}".format(color), lw = 2, ls= "--", marker= "*")
-        ax.set_ylim(0.3, ymax = 1)
+        #ax.set_ylim(0.3, ymax = 1)
         plt.yscale("log")
         plt.grid(True)
         canvas = FigureCanvas(fig)
         canvas.draw()
         canvas.show()
 
+    # --- end of функция для построения графика
     def process(self):
         zz = 1000 # длинна посылки, колличество элементов в строке
         nz = int(self.num/zz)
@@ -102,10 +105,11 @@ class Ui_MainWindow(object):
         # --- end of MIMO - канал связи
         # --- делитель потока сигнала делится по колличеству nTx
                 ind = []
-                s = []
                 for i in range(self.send):
                     ind.append([])
                     ind[i] = list(j for j in range(i, len(st), 2))
+
+                s = []
                 for i in range(self.send):
                     s.append([])
                     for j in ind[i]:
@@ -115,7 +119,7 @@ class Ui_MainWindow(object):
         # --- сигнал прошедший через канал
                 chanOut = []
                 for i in range(self.input):
-                    chanOut.append([0])
+                    chanOut.append(0)
                     for j in range(self.send):
                         chanOut[i] += conv(s[j], ht[j][i])
 
@@ -138,7 +142,7 @@ class Ui_MainWindow(object):
                 dl = len(y[0][0])
                 HM = [[0] * zz for i in range(dl*2)]
 
-                for k in range(0, zz - 2, 2):
+                for k in range(0, zz - 1, 2):
                     num = 0
                     for i in range(self.len):
                         HM[num + k][k] = hM[i][0][0]
