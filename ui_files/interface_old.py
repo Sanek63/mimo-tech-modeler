@@ -24,7 +24,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from input_window import Ui_OtherWindow   # Импортируем класс второго окна (Окна для ввода отношений Сигнал/Шум)
 from actions.GetMatrix import GetMatrix   # Функция, которая делит вектор-сигнала на колл-во-colCount длинну фильтра. Из вектора получается матрица
-from actions.GetVector import GetVector   # Функция для объединения векторов
+from GetVector import GetVector   # Функция для объединения векторов
 #-------------------------------------------------------------------------------
 
 class Ui_MainWindow(object):

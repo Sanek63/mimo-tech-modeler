@@ -1,9 +1,11 @@
+import numpy as np
+
 def GetVector(vector1, vector2):
     """
     Данная функция создает из 2-х векторов один вектор, в котором элементы чередуются
     """
-    nn = len(vector1) + len(vector2)
-    s = [0 for i in range(nn)]
+    nn = np.size(vector1) + np.size(vector2)
+    s = np.zeros(nn, float)
     vecIndex1 = 0
     vecIndex2 = 0
     for kk in range(nn):
