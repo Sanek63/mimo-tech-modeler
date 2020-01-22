@@ -11,12 +11,11 @@ import PyQt5.QtWidgets as QtWidgets       # Компоненты для прил
 import PyQt5.QtGui as QtGui               # Графический интерфейс пользователя
 import PyQt5.QtCore as QtCore             # Ядро функциональности
 
-import numpy
-import random
-import math
-import scipy
+import numpy                              # Математическая библиотеки
+import random                             # Библиотека для генерации случайных чисел
+import math                               # Библиотека для математических функций
+import matplotlib.pyplot as plt           # Библиотека для графического отображения объектов
 
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from GetVector import GetVector           # Функция для объединения векторов
@@ -27,17 +26,15 @@ from GetVector import GetVector           # Функция для объедин
 class Ui_MainWindow(object):
 
     def create_graphics(self, simBer, color):
-
-        fig, ax = plt.subplots(figsize=(5, 3), dpi= 150)
-        ax.set_title('BER системы MIMO 2х2 в канале с МСИ, L=3')
-        ax.legend(loc='upper left')
-        ax.set_ylabel('Битовый коэффициент ошибок')
+        fig, ax = plt.subplots()
+        ax.set(xlabel='ОСШ', ylabel='Битовый коэффициент ошибок', title='BER системы MIMO 2х2 в канале с МСИ, L=3')
         ax.set_xlim(0, xmax= self.Eb_N0_dB[-1])
-        fig.tight_layout()
-        plt.plot(self.Eb_N0_dB, simBer, color ="{}".format(color), lw = 2, ls="--", marker="*")
-        #ax.set_ylim(0.3, ymax = 1)
+        plt.plot(self.Eb_N0_dB, simBer, label = self.alg, color ="{}".format(color), lw = 2, ls="--", marker="*")
+        ax.set_ylim(10**-3, ymax = 1.5)
         plt.yscale("log")
         plt.grid(True)
+        lgnd = ax.legend(loc = "upper left",)
+        lgnd.get_frame().set_facecolor('#ffb19a')
         canvas = FigureCanvas(fig)
         canvas.draw()
         canvas.show()
@@ -46,8 +43,6 @@ class Ui_MainWindow(object):
         N = self.N
         alg = self.alg
         Eb_N0_dB = self.Eb_N0_dB
-        nTx = self.input
-        nRx = self.send
         '''
         for i in range(self.send):
             for j in range(self.input):
@@ -128,10 +123,8 @@ class Ui_MainWindow(object):
                 for i in range(0, d): y1.append(chanOut1[i] + pw20 * n1[i])
                 for i in range(0, d): y2.append(chanOut2[i] + pw20 * n2[i])
 
-                # %эквалайзер
-
                 yHat = GetVector(y1, y2)
-                ySampZF = WZF * yHat.getH()  # '; % sampling at time T
+                ySampZF = WZF * yHat.getH()
 
                 A = (THMmmse * HMmmse) + pw10 * im
                 Wmmse = numpy.linalg.solve(A, THMmmse)
@@ -168,7 +161,6 @@ class Ui_MainWindow(object):
         else:
             self.create_graphics(simBermmse, "red")
 
-        # --- end of подсчет побитовой ошибки
     def accept_parametrs(self):
         self.alg = self.comboBox.currentText()
         if len(self.lineEdit.text()) > 0:
@@ -203,7 +195,7 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(430, 399)
+        MainWindow.resize(441, 388)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.textBrowser_2 = QtWidgets.QTextBrowser(self.centralwidget)
@@ -231,9 +223,6 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.algoritm.setFont(font)
         self.algoritm.setObjectName("algoritm")
-
-
-
         self.num_of_counts = QtWidgets.QLabel(self.centralwidget)
         self.num_of_counts.setGeometry(QtCore.QRect(20, 100, 181, 31))
         font = QtGui.QFont()
@@ -252,7 +241,7 @@ class Ui_MainWindow(object):
         self.lineEdit.setFrame(True)
         self.lineEdit.setObjectName("lineEdit")
         self.SNR = QtWidgets.QLabel(self.centralwidget)
-        self.SNR.setGeometry(QtCore.QRect(20, 140, 241, 31))
+        self.SNR.setGeometry(QtCore.QRect(20, 140, 281, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
@@ -290,7 +279,7 @@ class Ui_MainWindow(object):
         self.len_anten.setFont(font)
         self.len_anten.setObjectName("len_anten")
         self.lineEdit_3 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_3.setGeometry(QtCore.QRect(310, 180, 113, 31))
+        self.lineEdit_3.setGeometry(QtCore.QRect(290, 180, 113, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(False)
@@ -313,10 +302,9 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.lineEdit_5.setFont(font)
         self.lineEdit_5.setObjectName("lineEdit_5")
-
         self.processButton = QtWidgets.QPushButton(self.centralwidget)
         self.processButton.setEnabled(True)
-        self.processButton.setGeometry(QtCore.QRect(20, 317, 401, 41))
+        self.processButton.setGeometry(QtCore.QRect(20, 317, 411, 41))
         font = QtGui.QFont()
         font.setPointSize(11)
         font.setBold(False)
@@ -326,8 +314,11 @@ class Ui_MainWindow(object):
         self.processButton.setFont(font)
         self.processButton.setObjectName("processButton")
         self.processButton.clicked.connect(self.accept_parametrs)
+        self.widget = QtWidgets.QWidget(self.centralwidget)
+        self.widget.setGeometry(QtCore.QRect(470, 60, 541, 301))
+        self.widget.setObjectName("widget")
         self.comboBox_2 = QtWidgets.QComboBox(self.centralwidget)
-        self.comboBox_2.setGeometry(QtCore.QRect(290, 140, 51, 31))
+        self.comboBox_2.setGeometry(QtCore.QRect(340, 140, 51, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(False)
@@ -339,7 +330,7 @@ class Ui_MainWindow(object):
         self.comboBox_2.addItem("")
         self.comboBox_2.addItem("")
         self.SNR_2 = QtWidgets.QLabel(self.centralwidget)
-        self.SNR_2.setGeometry(QtCore.QRect(260, 140, 16, 31))
+        self.SNR_2.setGeometry(QtCore.QRect(310, 140, 31, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(False)
@@ -352,20 +343,6 @@ class Ui_MainWindow(object):
         self.SNR_2.setScaledContents(False)
         self.SNR_2.setWordWrap(True)
         self.SNR_2.setObjectName("SNR_2")
-        self.SNR_3 = QtWidgets.QLabel(self.centralwidget)
-        self.SNR_3.setGeometry(QtCore.QRect(280, 140, 16, 31))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        font.setWeight(75)
-        self.SNR_3.setFont(font)
-        self.SNR_3.setAcceptDrops(False)
-        self.SNR_3.setAutoFillBackground(False)
-        self.SNR_3.setLineWidth(1)
-        self.SNR_3.setTextFormat(QtCore.Qt.AutoText)
-        self.SNR_3.setScaledContents(False)
-        self.SNR_3.setWordWrap(True)
-        self.SNR_3.setObjectName("SNR_3")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -377,20 +354,15 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.textBrowser_2.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt; font-weight:600;\">Входные данные</span></p></body></html>"))
         self.comboBox.setItemText(0, _translate("MainWindow", "ZF"))
         self.comboBox.setItemText(1, _translate("MainWindow", "MMSE"))
         self.algoritm.setText(_translate("MainWindow", "Алгоритм ="))
         self.num_of_counts.setText(_translate("MainWindow", "Число отсчетов ="))
         self.lineEdit.setText(_translate("MainWindow", "1000"))
-        self.SNR.setText(_translate("MainWindow", "Сигнал/шум (ОСШ) = "))
-        self.send_anten.setText(_translate("MainWindow", "Передавающие антенны ="))
+        self.SNR.setText(_translate("MainWindow", "Отношение сигнал/шум ="))
+        self.send_anten.setText(_translate("MainWindow", "Передающие антенны ="))
         self.input_anten.setText(_translate("MainWindow", "Принимающие антенны ="))
-        self.len_anten.setText(_translate("MainWindow", "Длина антенн ="))
+        self.len_anten.setText(_translate("MainWindow", "Длина памяти ="))
         self.lineEdit_3.setText(_translate("MainWindow", "2"))
         self.lineEdit_4.setText(_translate("MainWindow", "2"))
         self.lineEdit_5.setText(_translate("MainWindow", "3"))
@@ -399,5 +371,12 @@ class Ui_MainWindow(object):
         self.comboBox_2.setItemText(1, _translate("MainWindow", "15"))
         self.comboBox_2.setItemText(2, _translate("MainWindow", "20"))
         self.comboBox_2.setItemText(3, _translate("MainWindow", "25"))
-        self.SNR_2.setText(_translate("MainWindow", "0"))
-        self.SNR_3.setText(_translate("MainWindow", ":"))
+        self.SNR_2.setText(_translate("MainWindow", "0 :"))
+        self.textBrowser_2.setHtml(_translate("MainWindow",
+            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+            "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+            "p, li { white-space: pre-wrap; }\n"
+            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
+            "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\""
+            "><span style=\" font-size:14pt; font-weight:600;\">Входные данные</span></p></body></html>")
+        )

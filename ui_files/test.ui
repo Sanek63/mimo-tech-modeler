@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1021</width>
-    <height>399</height>
+    <width>441</width>
+    <height>388</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -130,7 +130,7 @@ p, li { white-space: pre-wrap; }
      <rect>
       <x>20</x>
       <y>140</y>
-      <width>241</width>
+      <width>281</width>
       <height>31</height>
      </rect>
     </property>
@@ -151,7 +151,7 @@ p, li { white-space: pre-wrap; }
      <number>1</number>
     </property>
     <property name="text">
-     <string>Сигнал/шум (ОСШ) = </string>
+     <string>Отношение сигнал/шум =</string>
     </property>
     <property name="textFormat">
      <enum>Qt::AutoText</enum>
@@ -180,7 +180,7 @@ p, li { white-space: pre-wrap; }
      </font>
     </property>
     <property name="text">
-     <string>Передавающие антенны =</string>
+     <string>Передающие антенны =</string>
     </property>
    </widget>
    <widget class="QLabel" name="input_anten">
@@ -220,13 +220,13 @@ p, li { white-space: pre-wrap; }
      </font>
     </property>
     <property name="text">
-     <string>Длина антенн =</string>
+     <string>Длина памяти =</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_3">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>290</x>
       <y>180</y>
       <width>113</width>
       <height>31</height>
@@ -291,7 +291,7 @@ p, li { white-space: pre-wrap; }
      <rect>
       <x>20</x>
       <y>317</y>
-      <width>401</width>
+      <width>411</width>
       <height>41</height>
      </rect>
     </property>
@@ -318,27 +318,10 @@ p, li { white-space: pre-wrap; }
      </rect>
     </property>
    </widget>
-   <widget class="QTextBrowser" name="textBrowser_3">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>10</y>
-      <width>541</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="html">
-     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Построение графиков&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-   </widget>
    <widget class="QComboBox" name="comboBox_2">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>340</x>
       <y>140</y>
       <width>51</width>
       <height>31</height>
@@ -375,9 +358,9 @@ p, li { white-space: pre-wrap; }
    <widget class="QLabel" name="SNR_2">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>310</x>
       <y>140</y>
-      <width>16</width>
+      <width>31</width>
       <height>31</height>
      </rect>
     </property>
@@ -398,45 +381,7 @@ p, li { white-space: pre-wrap; }
      <number>1</number>
     </property>
     <property name="text">
-     <string>0</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="scaledContents">
-     <bool>false</bool>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="SNR_3">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>140</y>
-      <width>16</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="acceptDrops">
-     <bool>false</bool>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="lineWidth">
-     <number>1</number>
-    </property>
-    <property name="text">
-     <string>:</string>
+     <string>0 :</string>
     </property>
     <property name="textFormat">
      <enum>Qt::AutoText</enum>

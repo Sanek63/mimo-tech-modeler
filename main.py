@@ -28,5 +28,6 @@ if __name__=="__main__":
     app = QtWidgets.QApplication(sys.argv)
     myapp = MyWin()
     myapp.show()
+    myapp.setFixedSize(441, 388)
     settings(myapp.ui) #Настройка объектов
     sys.exit(app.exec_())
