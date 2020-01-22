@@ -11,15 +11,15 @@ import PyQt5.QtWidgets as QtWidgets       # Компоненты для прил
 import PyQt5.QtGui as QtGui               # Графический интерфейс пользователя
 import PyQt5.QtCore as QtCore             # Ядро функциональности
 
-import numpy as np                        # Библиотека математики
-from numpy import convolve as conv        # Функция для свертки одномерных массивов
-from numpy import random as rd            # Функция для случайных значений
-from numpy import dot                     # Функция для перемножения матриц
-from numpy import zeros                   # Функция, создающая матрицу с элементами 0
-import matplotlib.pyplot as plt           # Функция для работы с двумерными фигурами
+import numpy
+import random
+import math
+import scipy
+
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-import GetVector                          # Функция для объединения векторов
+from GetVector import GetVector           # Функция для объединения векторов
 #-------------------------------------------------------------------------------
 
 
@@ -32,9 +32,9 @@ class Ui_MainWindow(object):
         ax.set_title('BER системы MIMO 2х2 в канале с МСИ, L=3')
         ax.legend(loc='upper left')
         ax.set_ylabel('Битовый коэффициент ошибок')
-        ax.set_xlim(0, xmax= self.osh[-1])
+        ax.set_xlim(0, xmax= self.Eb_N0_dB[-1])
         fig.tight_layout()
-        plt.plot(self.osh, simBer, color = "{}".format(color), lw = 2, ls= "--", marker= "*")
+        plt.plot(self.Eb_N0_dB, simBer, color ="{}".format(color), lw = 2, ls="--", marker="*")
         #ax.set_ylim(0.3, ymax = 1)
         plt.yscale("log")
         plt.grid(True)
@@ -43,11 +43,11 @@ class Ui_MainWindow(object):
         canvas.show()
 
     def process(self):
-        zz = 1000
-        nz = int(self.N/zz)
-
-        # --- генерация векторо импульсной характеристики
-        ht = [[0] * self.input for i in range(self.send)]
+        N = self.N
+        alg = self.alg
+        Eb_N0_dB = self.Eb_N0_dB
+        nTx = self.input
+        nRx = self.send
         '''
         for i in range(self.send):
             for j in range(self.input):
@@ -55,101 +55,117 @@ class Ui_MainWindow(object):
                 for k in range(self.len):
                     ht[i][j].append(round(random.uniform(-1, 1), 1))
         '''
-        ht[0][0] = [-0.9, 0.7, -0.1]
-        ht[0][1] = [-0.3, 0.5, -0.4]
-        ht[1][0] = [0.6, -0.3, 0.2]
-        ht[1][1] = [0.8, -0.6, 0.3]
+        ht11 = [-0.9, 0.7, -0.1]
+        ht12 = [-0.3, 0.5, -0.4]
+        ht21 = [0.6, -0.3, 0.2]
+        ht22 = [0.8, -0.6, 0.3]
 
-        hM = [[] for i in range(self.len)]
-        for i in range(self.len):
-            for k in range(self.input):
-                hM[i].append([])
-                for j in range(self.send):
-                    hM[i][k].append(ht[j][k][i])
+        L = len(ht11)
+        zz = 1000
 
-        nErrZF = zeros(len(self.osh), float)
-        nErrmmse = zeros(len(self.osh), float)
+        nz = N / zz
 
-        for ii in range(len(self.osh)):
-            ip = rd.standard_normal((self.N,)) > 0.5
-            s = 2 * ip - 1
-            ss = np.reshape(s, (int(self.N / zz), -1))
+        HM1 = [[ht11[0], ht21[0]], [ht12[0], ht22[0]]]
+        HM2 = [[ht11[1], ht21[1]], [ht12[1], ht22[1]]]
+        HM3 = [[ht11[2], ht21[2]], [ht12[2], ht22[2]]]
 
+        nErrZF = []
+        nErrmmse = []
 
-            ssipZF = zeros((nz, zz), float)
-            ssipmmse = zeros((nz, zz), float)
+        dl = int(zz / 2 + L - 1)
+        HM = numpy.empty(shape=[dl * 2, zz])
+        HM.fill(0)
+        for k in range(0, zz - 2, 2):
+            numpy.put(HM[0 + k], (0 + k, 1 + k), HM1[0])
+            numpy.put(HM[1 + k], (0 + k, 1 + k), HM1[1])
+            numpy.put(HM[2 + k], (0 + k, 1 + k), HM2[0])
+            numpy.put(HM[3 + k], (0 + k, 1 + k), HM2[1])
+            numpy.put(HM[4 + k], (0 + k, 1 + k), HM3[0])
+            numpy.put(HM[5 + k], (0 + k, 1 + k), HM3[1])
 
-            for ff in range(nz):
-                st = ss[ff][:]
+        HMzf = HM
+        HMmmse = numpy.matrix(HM)
+        THMmmse = HMmmse.getH()
+        WZF = numpy.linalg.pinv(HMzf)
 
-                # --- end of MIMO - канал связи
-                # --- делитель потока сигнала делится по колличеству nTx
-                ind1 = np.arange(0, st.__len__(), 2)
-                ind2 = np.arange(1, st.__len__(), 2)
+        im = numpy.identity(zz)
 
-                s1 = np.array([st[i] for i in ind1])
-                s2 = np.array([st[i] for i in ind2])
-                # --- end of делитель потока сигнала делиться по колличеству nTx
-                # --- сигнал прошедший через канал
-                chanOut1 = conv(s1, ht[0][0]) + conv(s2, ht[1][0])
-                chanOut2 = conv(s1, ht[0][1]) + conv(s2, ht[1][1])
+        ind1 = []
+        ind2 = []
+        for i in range(0, zz, 2): ind1.append(i)
+        for i in range(1, zz, 2): ind2.append(i)
 
-                # --- end of сигнал прошедшик через канал
-                # --- генерация отсчетов Гауссовского шума
-                n1 = 1 / np.sqrt(2) * (rd.standard_normal((int(zz / 2 + self.len - 1),)) + 1j * rd.standard_normal(
-                    (int(zz / 2 + self.len - 1),)))
-                n2 = 1 / np.sqrt(2) * (rd.standard_normal((int(zz / 2 + self.len - 1),)) + 1j * rd.standard_normal(
-                    (int(zz / 2 + self.len - 1),)))
+        for ii in range(0, len(Eb_N0_dB)):
+            ip = [random.randint(0, 1) for i in range(N)]
+            s = []
+            for i in range(N): s.append((ip[i] * 2) - 1)
 
-                # --- end of генерация отсчетов Гауссовского шума
-                # --- сигнал на входе эквалайзера, прошедший весь канал связи с БГШ
-                y1 = chanOut1 + np.power(10, -self.osh[ii] / 20) * n1
-                y2 = chanOut2 + np.power(10, -self.osh[ii] / 20) * n2
+            ss = numpy.reshape(s, (int(self.N / zz), -1))
+            ssipZF = []
+            ssipmmse = []
 
-                # --- end of сигнал на входе эквалайзера, прошедший весь канал связи с БГШ
-                # --- фильтрация
-                dl = np.size(y1)
-                HM = zeros((2 * dl, zz), float)
+            for ff in range(0, int(nz)):
+                st = ss[ff]
 
-                for k in range(0, zz - 1, 2):
-                    num = 0
-                    for i in range(self.len):
-                        HM[num + k][k] = hM[i][0][0]
-                        HM[num + k][k + 1] = hM[i][0][1]
-                        HM[num + 1 + k][k] = hM[i][1][0]
-                        HM[num + 1 + k][k + 1] = hM[i][1][1]
-                        num += 2
-                yHat = GetVector(y1, y2)  # объединитель потока
+                s1 = []
+                for i in ind1: s1.append(st[i])
 
-                # --- end of фильтрация
-                # --- генерация матриц для алгоритмов
-                if self.alg == "ZF":
-                    HMzf = HM
-                    WZF = np.linalg.pinv(HMzf)
-                    ySampZF = dot(WZF, yHat.transpose())
-                    ipHatZFst = ySampZF.transpose().real > 0
-                    ssipZF[ff][:] = ipHatZFst
+                s2 = []
+                for i in ind2: s2.append(st[i])
 
-                elif self.alg == "MMSE":
-                    HMmmse = HM
-                    Wmmse = np.linalg.solve((dot(HMmmse.transpose(), HMmmse) + (10 ** (-self.osh[ii] / 10) * np.identity(zz))), HMmmse.transpose())
-                    ySampmmse = dot(Wmmse, yHat.transpose())
-                    ipHatmmsest = ySampmmse.transpose().real > 0
-                    ssipmmse[ff][:] = ipHatmmsest
+                chanOut1 = numpy.convolve(s1, ht11) + numpy.convolve(s2, ht21)
+                chanOut2 = numpy.convolve(s1, ht12) + numpy.convolve(s2, ht22)
 
-            if self.alg == "ZF":
-                ipHatZF = np.reshape(ssipZF.transpose(), self.N)
-                minus = np.subtract(ip, ipHatZF)
-                find = minus.ravel().nonzero()
-                nErrZF[ii] = np.size(find, axis=1)
-            elif self.alg == "MMSE":
-                ipHatmmse = np.reshape(ssipmmse.transpose(), self.N)
+                d = int(zz / 2 + L - 1)
+                n1 = 1 / math.sqrt(2) * (numpy.random.normal(0, 1, d) + 1j * numpy.random.normal(0, 1, d))
+                n2 = 1 / math.sqrt(2) * (numpy.random.normal(0, 1, d) + 1j * numpy.random.normal(0, 1, d))
 
-        if self.alg == "ZF":
-            simBerZF = [i / self.N for i in nErrZF]
+                y1 = []
+                y2 = []
+                pw20 = math.pow(10, (-1 * Eb_N0_dB[ii] / 20))
+                pw10 = math.pow(10, (-1 * Eb_N0_dB[ii] / 10))
+
+                for i in range(0, d): y1.append(chanOut1[i] + pw20 * n1[i])
+                for i in range(0, d): y2.append(chanOut2[i] + pw20 * n2[i])
+
+                # %эквалайзер
+
+                yHat = GetVector(y1, y2)
+                ySampZF = WZF * yHat.getH()  # '; % sampling at time T
+
+                A = (THMmmse * HMmmse) + pw10 * im
+                Wmmse = numpy.linalg.solve(A, THMmmse)
+                ySampmmse = Wmmse * yHat.getH()
+
+                ipHatZFst = ySampZF.getH().real.A1
+                ipHatmmsest = ySampmmse.getH().real.A1
+
+                for i in range(0, len(ipHatZFst)):
+                    if ipHatZFst[i] > 0:
+                        ipHatZFst[i] = int(1)
+                    else:
+                        ipHatZFst[i] = 0
+
+                for i in range(0, len(ipHatmmsest)):
+                    if ipHatmmsest[i] > 0:
+                        ipHatmmsest[i] = int(1)
+                    else:
+                        ipHatmmsest[i] = 0
+
+                ssipZF.append(ipHatZFst)
+                ssipmmse.append(ipHatmmsest)
+
+            ipHatZF = numpy.matrix(ssipZF).getH().reshape(1, N, order='F')
+            ipHatmmse = numpy.matrix(ssipmmse).getH().reshape(1, N, order='F')
+            nErrZF.append(len(numpy.nonzero(numpy.array(ip - ipHatZF))[0]))
+            nErrmmse.append(len(numpy.nonzero(numpy.array(ip - ipHatmmse))[0]))
+
+        simBerZF = numpy.array(nErrZF) / N
+        simBermmse = numpy.array(nErrmmse) / N
+
+        if alg == "ZF":
             self.create_graphics(simBerZF, "blue")
         else:
-            simBermmse = [i / self.N for i in nErrmmse]
             self.create_graphics(simBermmse, "red")
 
         # --- end of подсчет побитовой ошибки
@@ -162,9 +178,9 @@ class Ui_MainWindow(object):
             self.N = 0
 
         n = int(self.comboBox_2.currentText())
-        self.osh = []
+        self.Eb_N0_dB = []
         for i in range(n + 1):
-            self.osh.append(i)
+            self.Eb_N0_dB.append(i)
 
         if len(self.lineEdit_3.text()) > 0:
             self.send = int(self.lineEdit_3.text())
