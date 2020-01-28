@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 import sys                             # Библиотека обеспечивает доступ к некоторым системным функциям
-from interface import *                # Импорт всех аргументов из файла interface.py
+from actions.interface import *        # Импорт всех аргументов из файла interface.py
 import PyQt5.QtWidgets as QtWidgets    # Компоненты для приложения
 import PyQt5.QtGui as QtGui            # Графический интерфейс пользователя
 #-------------------------------------------------------------------------------
@@ -25,6 +25,12 @@ def settings(ui):
     """Поле ввода для Длины антенн : lineEdit_5"""
 
 if __name__=="__main__":
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
     app = QtWidgets.QApplication(sys.argv)
     myapp = MyWin()
     myapp.show()
