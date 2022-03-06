@@ -21,10 +21,13 @@ def settings(ui):
     """Поле ввода для ОСШ (Сигнал/Шум) : lineEdit_2"""
 
     """Поле ввода для Передавающих антенн : lineEdit_3"""
+    ui.lineEdit_3.setValidator(QtGui.QIntValidator(0, 10 ** 6))
 
     """Поле ввода для Принимающих антенн : lineEdit_4"""
+    ui.lineEdit_4.setValidator(QtGui.QIntValidator(0, 10 ** 6))
 
     """Поле ввода для Длины антенн : lineEdit_5"""
+    ui.lineEdit_5.setValidator(QtGui.QIntValidator(0, 10 ** 6))
 
 
 if __name__ == "__main__":
