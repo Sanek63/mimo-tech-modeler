@@ -9,7 +9,7 @@ from actions.create_graphics import create_graphics  # Функция для с�
 
 # -------------------------------------------------------------------------------
 
-def process(N, alg, Eb_N0_dB, send, input, l):
+def process(N, alg, n, send, input, l):
     '''
     for i in range(self.send):
         for j in range(self.input):
@@ -17,6 +17,8 @@ def process(N, alg, Eb_N0_dB, send, input, l):
             for k in range(self.len):
                 ht[i][j].append(round(random.uniform(-1, 1), 1))
     '''
+    Eb_N0_dB = list(i for i in range(n + 1))
+
     ht11 = [-0.9, 0.7, -0.1]
     ht12 = [-0.3, 0.5, -0.4]
     ht21 = [0.6, -0.3, 0.2]

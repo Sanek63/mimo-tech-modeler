@@ -17,6 +17,43 @@ from actions.processing import process
 # -------------------------------------------------------------------------------
 
 class Ui_MainWindow(object):
+    def show_error(self, title: str = '', text: str = ''):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setText(text)
+        msg.setWindowTitle(title)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+
+        # start the app
+        _ = msg.exec_()
+
+    def validate_count_statements(self, value: int) -> bool:
+        if value < 1:
+            self.show_error(
+                title="Ошибка",
+                text="Введите значение, отличное от 1"
+            )
+            return False
+        if not (value % 2 == 0 and value % 3 == 0):
+            self.show_error(
+                title='Ошибка',
+                text="Значение должно быть кратное 2 и 3"
+            )
+            return False
+
+        return True
+
+    def validate_relation_signal_to_ratio(self, value: int) -> bool:
+        return True
+
+    def validate_input_antennas(self, value: int) -> bool:
+        return True
+
+    def validate_send_antennas(self, value: int) -> bool:
+        return True
+
+    def validate_length_channel(self, value: int) -> bool:
+        return True
 
     def accept_parametrs(self):
         """
@@ -25,15 +62,29 @@ class Ui_MainWindow(object):
             которые ввел пользователь
         """
         alg = self.comboBox.currentText()
-        N = int(self.lineEdit.text()) if int(self.lineEdit.text()) > 0 else 0
-        n = int(self.comboBox_2.currentText())
 
-        Eb_N0_dB = list(i for i in range(n + 1))
-        send = int(self.lineEdit_3.text()) if int(self.lineEdit_3.text()) > 0 else 0
-        input = int(self.lineEdit_4.text()) if int(self.lineEdit_4.text()) > 0 else 0
-        l = int(self.lineEdit_5.text()) if int(self.lineEdit_5.text()) > 0 else 0
+        count_statements = int(self.lineEdit.text())
+        if not self.validate_count_statements(count_statements):
+            return
 
-        process(N, alg, Eb_N0_dB, send, input, l)
+        relation_signal_to_ratio = int(self.comboBox_2.currentText())
+        if not self.validate_relation_signal_to_ratio(relation_signal_to_ratio):
+            return
+
+        count_send_antennas = int(self.lineEdit_3.text()) if int(self.lineEdit_3.text()) > 0 else 0
+        if not self.validate_send_antennas(count_send_antennas):
+            return
+
+        count_input_antennas = int(self.lineEdit_4.text()) if int(self.lineEdit_4.text()) > 0 else 0
+        if not self.validate_input_antennas(count_input_antennas):
+            return
+
+        channel_length = int(self.lineEdit_5.text()) if int(self.lineEdit_5.text()) > 0 else 0
+        if not self.validate_length_channel(channel_length):
+            return
+
+        process(count_statements, alg, relation_signal_to_ratio,
+                count_send_antennas, count_input_antennas, channel_length)
 
         return
 
@@ -233,10 +284,10 @@ class Ui_MainWindow(object):
         self.comboBox_2.setItemText(3, _translate("MainWindow", "25"))
         self.SNR_2.setText(_translate("MainWindow", "0 :"))
         self.textBrowser_2.setHtml(_translate("MainWindow",
-            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-            "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-            "p, li { white-space: pre-wrap; }\n"
-            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
-            "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\""
-            "><span style=\" font-size:14pt; font-weight:600;\">Входные данные</span></p></body></html>")
-        )
+                                              "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                              "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                              "p, li { white-space: pre-wrap; }\n"
+                                              "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
+                                              "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\""
+                                              "><span style=\" font-size:14pt; font-weight:600;\">Входные данные</span></p></body></html>")
+                                   )
