@@ -19,19 +19,30 @@ def process(N, alg, n, send, input, l):
     '''
     Eb_N0_dB = list(i for i in range(n + 1))
 
-    ht11 = [-0.9, 0.7, -0.1]
-    ht12 = [-0.3, 0.5, -0.4]
-    ht21 = [0.6, -0.3, 0.2]
-    ht22 = [0.8, -0.6, 0.3]
-
-    L = len(ht11)
+    L = send
     zz = 1000
+    nz = N // zz
 
-    nz = N / zz
+    ht = {
+        i: {j: [random.random() * 2 - 1 for _ in range(l)]}
+        for i in range(send)
+        for j in range(input)
+    }
 
-    HM1 = [[ht11[0], ht21[0]], [ht12[0], ht22[0]]]
-    HM2 = [[ht11[1], ht21[1]], [ht12[1], ht22[1]]]
-    HM3 = [[ht11[2], ht21[2]], [ht12[2], ht22[2]]]
+    # ht11 = [random.random() * 2 - 1 for _ in range(3)]
+    # ht12 = [random.random() * 2 - 1 for _ in range(3)]
+    # ht21 = [random.random() * 2 - 1 for _ in range(3)]
+    # ht22 = [random.random() * 2 - 1 for _ in range(3)]
+
+    HMN = {
+        n: [
+            [ht[i][j][n] for i in range(send)] for j in range(input)
+        ] for n in range(l)
+    }
+
+    # HM1 = [[ht11[0], ht21[0]], [ht12[0], ht22[0]]]
+    # HM2 = [[ht11[1], ht21[1]], [ht12[1], ht22[1]]]
+    # HM3 = [[ht11[2], ht21[2]], [ht12[2], ht22[2]]]
 
     nErrZF = []
     nErrmmse = []
