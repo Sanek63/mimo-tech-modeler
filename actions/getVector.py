@@ -1,5 +1,6 @@
 import numpy
 
+
 def GetVector(vector1, vector2):
     """
         Данная функция создает из 2-х
@@ -17,4 +18,5 @@ def GetVector(vector1, vector2):
         else:
             s.append(vector2[vecIndex2])
             vecIndex2 = vecIndex2 + 1
+
     return numpy.matrix(s)

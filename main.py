@@ -1,9 +1,11 @@
-#-------------------------------------------------------------------------------
-import sys                             # Библиотека обеспечивает доступ к некоторым системным функциям
-from actions.interface import *        # Импорт всех аргументов из файла interface.py
-import PyQt5.QtWidgets as QtWidgets    # Компоненты для приложения
-import PyQt5.QtGui as QtGui            # Графический интерфейс пользователя
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+import sys  # Библиотека обеспечивает доступ к некоторым системным функциям
+from actions.interface import *  # Импорт всех аргументов из файла interface.py
+import PyQt5.QtWidgets as QtWidgets  # Компоненты для приложения
+import PyQt5.QtGui as QtGui  # Графический интерфейс пользователя
+
+
+# -------------------------------------------------------------------------------
 
 class MyWin(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -24,7 +26,8 @@ def settings(ui):
 
     """Поле ввода для Длины антенн : lineEdit_5"""
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
@@ -35,5 +38,5 @@ if __name__=="__main__":
     myapp = MyWin()
     myapp.show()
     myapp.setFixedSize(441, 388)
-    settings(myapp.ui) #Настройка объектов
+    settings(myapp.ui)  # Настройка объектов
     sys.exit(app.exec_())

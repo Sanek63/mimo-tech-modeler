@@ -6,13 +6,15 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-#-------------------------------------------------------------------------------
-import PyQt5.QtWidgets as QtWidgets       # Компоненты для приложения
-import PyQt5.QtGui as QtGui               # Графический интерфейс пользователя
-import PyQt5.QtCore as QtCore             # Ядро функциональности
+# -------------------------------------------------------------------------------
+import PyQt5.QtWidgets as QtWidgets  # Компоненты для приложения
+import PyQt5.QtGui as QtGui  # Графический интерфейс пользователя
+import PyQt5.QtCore as QtCore  # Ядро функциональности
 
 from actions.processing import process
-#-------------------------------------------------------------------------------
+
+
+# -------------------------------------------------------------------------------
 
 class Ui_MainWindow(object):
 
@@ -23,16 +25,12 @@ class Ui_MainWindow(object):
             которые ввел пользователь
         """
         alg = self.comboBox.currentText()
-
         N = int(self.lineEdit.text()) if len(self.lineEdit.text()) > 0 else 0
-
         n = int(self.comboBox_2.currentText())
-        Eb_N0_dB =  list(i for i in range(n + 1))
 
+        Eb_N0_dB = list(i for i in range(n + 1))
         send = int(self.lineEdit_3.text()) if len(self.lineEdit_3.text()) > 0 else 0
-
         input = int(self.lineEdit_4.text()) if len(self.lineEdit_4.text()) > 0 else 0
-
         l = int(self.lineEdit_5.text()) if len(self.lineEdit_5.text()) > 0 else 0
 
         process(N, alg, Eb_N0_dB, send, input, l)

@@ -1,5 +1,6 @@
-import matplotlib.pyplot as plt           # Библиотека для графического отображения объектов
+import matplotlib.pyplot as plt  # Библиотека для графического отображения объектов
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 
 def create_graphics(Eb_N0_dB, alg, simBer, color):
     """
@@ -24,3 +25,5 @@ def create_graphics(Eb_N0_dB, alg, simBer, color):
     canvas = FigureCanvas(fig)
     canvas.draw()
     canvas.show()
+
+    return
