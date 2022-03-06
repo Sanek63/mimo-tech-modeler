@@ -20,20 +20,22 @@ class Ui_MainWindow(object):
 
     def accept_parametrs(self):
         """
-             Данная функция предназначена
-            для получения данных для рассчета,
+            Данная функция предназначена
+            для получения данных для расчета,
             которые ввел пользователь
         """
         alg = self.comboBox.currentText()
-        N = int(self.lineEdit.text()) if len(self.lineEdit.text()) > 0 else 0
+        N = int(self.lineEdit.text()) if int(self.lineEdit.text()) > 0 else 0
         n = int(self.comboBox_2.currentText())
 
         Eb_N0_dB = list(i for i in range(n + 1))
-        send = int(self.lineEdit_3.text()) if len(self.lineEdit_3.text()) > 0 else 0
-        input = int(self.lineEdit_4.text()) if len(self.lineEdit_4.text()) > 0 else 0
-        l = int(self.lineEdit_5.text()) if len(self.lineEdit_5.text()) > 0 else 0
+        send = int(self.lineEdit_3.text()) if int(self.lineEdit_3.text()) > 0 else 0
+        input = int(self.lineEdit_4.text()) if int(self.lineEdit_4.text()) > 0 else 0
+        l = int(self.lineEdit_5.text()) if int(self.lineEdit_5.text()) > 0 else 0
 
         process(N, alg, Eb_N0_dB, send, input, l)
+
+        return
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
